@@ -1,0 +1,288 @@
+# ================================================
+# PromptGFM-Bio .gitignore
+# Production-grade exclusions for GitHub
+# ================================================
+
+# =====================================
+# Python
+# =====================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyc
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
+
+# =====================================
+# Virtual Environments
+# =====================================
+venv/
+env/
+ENV/
+.venv
+.conda/
+conda-meta/
+
+# =====================================
+# IDEs and Editors
+# =====================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+.project
+.pydevproject
+.settings/
+
+# =====================================
+# Operating Systems
+# =====================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# =====================================
+# Jupyter Notebook
+# =====================================
+.ipynb_checkpoints/
+*.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+.jupyter/
+
+# =====================================
+# PyTorch Model Files
+# =====================================
+# Exclude all model checkpoints and weights (typically >10MB each)
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+*.bin
+*.h5
+*.pb
+*.tflite
+*.onnx
+
+# Keep only .gitkeep and .json metadata
+!.gitkeep
+!*.json
+
+# =====================================
+# Large Data Files - Raw Datasets
+# =====================================
+# Exclude all large biomedical databases
+# Users should download these using provided scripts
+data/raw/*
+!data/raw/.gitkeep
+!data/raw/README.md
+
+# Specific large raw data exclusions
+data/raw/string/
+data/raw/biogrid/
+data/raw/disgenet/
+data/raw/hpo/
+data/raw/orphanet/
+data/raw/uniprot/
+
+# =====================================
+# Large Data Files - Processed
+# =====================================
+# Exclude processed graphs and intermediate files
+data/processed/*
+!data/processed/.gitkeep
+!data/processed/README.md
+
+# Re-include small config/metadata files if needed
+# !data/processed/metadata.json
+
+# =====================================
+# Data Splits (if large)
+# =====================================
+data/splits/*.pt
+data/splits/*.pkl
+data/splits/*.npy
+!data/splits/.gitkeep
+!data/splits/*.csv
+
+# =====================================
+# Model Checkpoints Directory
+# =====================================
+# Exclude all checkpoint directories (models are >10MB each)
+checkpoints/*
+!checkpoints/.gitkeep
+!checkpoints/README.md
+
+# Archive directories
+checkpoints/promptgfm_*/
+checkpoints/*_archive_*/
+
+# =====================================
+# Experiment Tracking and Logs
+# =====================================
+# Weights & Biases
+wandb/
+*.wandb
+
+# TensorBoard
+runs/
+tensorboard/
+*.tfevents.*
+
+# MLflow
+mlruns/
+.mlflow/
+
+# Generic logs
+logs/
+*.log
+*.out
+*.err
+
+# Training outputs
+outputs/
+results/
+
+# =====================================
+# Testing and Coverage
+# =====================================
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# =====================================
+# Environment Variables and Secrets
+# =====================================
+.env
+.env.local
+.env.*.local
+.envrc
+secrets.yaml
+secrets.yml
+*.key
+*.pem
+*.crt
+
+# =====================================
+# Temporary and Cache Files
+# =====================================
+tmp/
+temp/
+*.tmp
+*.temp
+*.cache
+.cache/
+downloads/
+scratch/
+
+# HuggingFace cache (large transformer models)
+.cache/huggingface/
+transformers_cache/
+
+# Sentence transformers cache
+.sentence_transformers/
+
+# =====================================
+# Documentation Build Artifacts
+# =====================================
+docs/_build/
+docs/.doctrees/
+site/
+
+# =====================================
+# Compressed Archives
+# =====================================
+*.zip
+*.tar.gz
+*.tar
+*.gz
+
+# =====================================
+# Development & Internal Tracking Files
+# =====================================
+# Project status and progress tracking files
+*STATUS*.md
+*COMPLETE*.md
+*PROGRESS*.md
+*ROADMAP*.md
+*VALIDATION*.md
+
+# Helper scripts and setup guides
+verify_before_push.ps1
+PUSH_TO_GITHUB.md
+READY_TO_PUSH.md
+GITHUB_PREPARATION_COMPLETE.md
+
+# Internal planning documents
+data_expansion_action_plan.md
+CONFERENCE_PAPER_ROADMAP.md
+
+# Duplicate implementation files (actual code in src/)
+hpo_bridge_implementation.py
+orphadata_integration.py
+
+# Copilot/AI assistant prompts
+promptgfm_bio_copilot_prompt.md
+*copilot*.md
+*.bz2
+*.7z
+*.rar
+
+# Exception: Allow small example archives if needed
+# !examples/*.zip
+
+# =====================================
+# Database Files
+# =====================================
+*.db
+*.sqlite
+*.sqlite3
+
+# =====================================
+# Large Miscellaneous
+# =====================================
+# Any file larger than 100MB should be excluded
+# GitHub has a 100MB file size limit
+*.dump
+*.sql
+*.parquet
+
+# =====================================
+# Project-Specific
+# =====================================
+# Add any project-specific exclusions here
+*.prof
+profiling/
+benchmark_results/

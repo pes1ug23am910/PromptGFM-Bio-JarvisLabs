@@ -1,0 +1,74 @@
+## Project: PromptGFM-Bio
+Root: /mnt/clear/Extra/PromptGFM-Bio_2026-04-04_17-59-44
+Workstation root: /home/mluser/projects_yash/new_project/PromptGFM-Bio
+Env: Python 3.12, PyTorch 2.6.0+cu124, CUDA 12.4, RTX 4090 (24GB)
+Use python3 (not python). micromamba is not available on this machine.
+
+## Model architecture
+- GNN: GraphSAGE, 3 layers, 128→512→512
+- Prompt encoder: frozen PubMedBERT (microsoft/BiomedNLP-PubMedBERT), CLS pooling → 768-dim
+- Conditioning: FiLM (γ,β = MLP(prompt); h' = γ⊙h + β)
+- Predictor: concat(gene_emb, disease_emb) → MLP → score
+- Training: BCE + ranking + listnet loss, 5 negatives per positive
+
+## Graph state
+- data/processed/biomedical_graph.pt — BUILT, do not delete
+- Nodes: gene=19,576 | disease=16,841 | phenotype=11,794
+- Edges: gene↔gene=1,854,012 (STRING PPI ≥700) | gene↔disease=9,741,610
+- Message passing IS active
+
+## Checkpoints
+- Best v6 model: checkpoints/promptgfm_film/best_model.pt (epoch 87)
+- Ablation checkpoints: checkpoints/ablation_1_mlp_only/ ... ablation_4_full_model/
+- Ablations currently RUNNING on workstation (PID 12627, nohup)
+  - ablation_1 (MLP only): ~epoch 28/100, AUROC 0.9503, still climbing
+  - ablations 2, 3, 4: queued, run sequentially after ablation_1
+
+## Known results (full model v6)
+Test AUROC:     0.9626
+Test AUPR:      0.0188  ← low due to 19,576-gene ranking, expected
+Hit Rate@10:    0.3218
+Hit Rate@20:    0.4175
+Hit Rate@50:    0.5573
+Hit Rate@100:   0.6537
+MRR:            0.1588
+MAP:            0.0569
+
+## Paper framing
+- Lead metric: Hit Rate@50 (0.5573) — clinically meaningful, easy to explain
+- Headline metric: AUROC (0.9626) — good for abstract
+- Do NOT lead with AUPR in paper — low value is expected, not a flaw
+- Paper story: FiLM-conditioned GraphSAGE outperforms static-feature baselines
+  for rare disease gene prioritization, with zero-shot generalization
+- Zero-shot set: 117 diseases with ≤5 known genes, confirmed not in training split
+
+## Ablation table (fill in after runs complete)
+| Variant              | use_gnn | use_cond | AUROC | Hit@50 | MRR |
+|----------------------|---------|----------|-------|--------|-----|
+| MLP only             | false   | false    | TBD   | TBD    | TBD |
+| Prompt only (FiLM)   | false   | true     | TBD   | TBD    | TBD |
+| GNN only (GraphSAGE) | true    | false    | TBD   | TBD    | TBD |
+| Full PromptGFM-Bio   | true    | true     |0.9626 | 0.5573 |0.159|
+
+## Key files
+- src/models/promptgfm.py        ← main model (use_gnn + use_conditioning flags added)
+- src/models/gnn_backbone.py     ← GraphSAGE encoder
+- src/models/conditioning.py     ← FiLM (use_conditioning flag added)
+- src/training/finetune.py       ← training loop (AMP fixed, torch.amp.autocast)
+- scripts/train.py               ← entry point (fork-context patched)
+- scripts/evaluate.py            ← full-vocab ranking + --zero_shot flag added
+- scripts/find_rare_diseases.py  ← identifies 117 zero-shot diseases
+- scripts/run_ablations.sh       ← runs 4 configs × 3 seeds = 12 runs
+- configs/workstation_config.yaml← active config (use_gnn/use_conditioning flags present)
+- configs/ablations/             ← 4 ablation YAML files
+- data/splits/zero_shot_rare_diseases.json ← 117 disease IDs for zero-shot eval
+
+## Rules Cline must follow
+- Always read a file fully before editing it
+- Never edit PROJECT_ROOT, path setup, or checkpoint save/load logic
+- Never hardcode num_workers=0 as a permanent fix
+- Output a plan in Plan mode before touching any file
+- Terminal: cd /mnt/clear/Extra/PromptGFM-Bio_2026-04-04_17-59-44
+- After any .py edit: python3 -m py_compile <file>
+- Commit after each task: git add -A && git commit -m "<description>"
+- Do NOT kill or interfere with the running ablation process (PID 12627)

@@ -1,0 +1,20 @@
+PromptGFM-Bio upload checklist for latest STRING/PPI notebook fix
+Date: 2026-04-03
+Repo root: M:/Extra/PromptGMF-Bio
+
+Only these files are required for the fix that was just implemented.
+Paths are relative to repo root.
+
+CHANGED FILES
+- src/data/preprocess.py
+- src/data/download.py
+- notebooks/New_workstation_training_v7_fixed_v5.5.ipynb
+
+ADDED FILES
+- add_string_ppi_edges.py
+
+Suggested re-upload order
+1) src/data/preprocess.py
+2) src/data/download.py
+3) add_string_ppi_edges.py
+4) notebooks/New_workstation_training_v7_fixed_v5.5.ipynb

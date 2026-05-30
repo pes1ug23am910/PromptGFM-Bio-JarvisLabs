@@ -1,0 +1,147 @@
+MIT License
+
+Copyright (c) 2026 Yash Verma
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+## Third-Party Licenses and Acknowledgments
+
+This project uses several third-party libraries and datasets, each with their own licenses:
+
+### Software Dependencies
+
+- **PyTorch** - BSD-style License
+  Copyright (c) 2016-present, Facebook Inc.
+
+- **PyTorch Geometric** - MIT License
+  Copyright (c) 2021 Matthias Fey
+
+- **Transformers (HuggingFace)** - Apache License 2.0
+  Copyright 2018- The Hugging Face team
+
+- **BioBERT** - Apache License 2.0
+  Copyright 2019 DMIS Lab, Korea University
+
+- **NumPy** - BSD License
+  Copyright (c) 2005-2023, NumPy Developers
+
+- **Pandas** - BSD 3-Clause License
+  Copyright (c) 2008-2023, AQR Capital Management, LLC
+
+### Data Sources
+
+The project integrates publicly available biomedical databases:
+
+- **STRING Database** - Creative Commons BY 4.0
+  Szklarczyk et al., Nucleic Acids Research (2023)
+  https://string-db.org/
+
+- **BioGRID** - MIT License
+  Oughtred et al., Nucleic Acids Research (2021)
+  https://thebiogrid.org/
+
+- **DisGeNET** - ODbL 1.0 License (Open Database License)
+  Piñero et al., Nucleic Acids Research (2020)
+  https://www.disgenet.org/
+
+- **Human Phenotype Ontology (HPO)** - Custom License (Free for research)
+  Köhler et al., Nucleic Acids Research (2021)
+  https://hpo.jax.org/
+
+- **Orphanet** - Creative Commons BY 4.0
+  INSERM, Orphanet
+  https://www.orphadata.com/
+
+### Pretrained Models
+
+- **BioBERT** - Apache License 2.0
+  Lee et al., Bioinformatics (2020)
+  https://github.com/dmis-lab/biobert
+
+- **PubMedBERT** - Apache License 2.0
+  Gu et al., AAAI (2021)
+  https://huggingface.co/microsoft/BiomedNLP-PubMedBERT
+
+---
+
+## Citation Requirements
+
+If you use this software and the underlying datasets in your research, please cite:
+
+**This Work**:
+```bibtex
+@software{promptgfm_bio,
+  author = {Yash Verma},
+  title = {PromptGFM-Bio: A Prompt-Conditioned Graph Foundation Model for Rare Disease Gene Prediction},
+  year = {2026},
+  url = {https://github.com/pes1ug23am910/PromptGFM-Bio}
+}
+```
+
+**STRING Database**:
+```bibtex
+@article{string2023,
+  title={The STRING database in 2023: protein–protein association networks and functional enrichment analyses for any sequenced genome of interest},
+  author={Szklarczyk, Damian and others},
+  journal={Nucleic Acids Research},
+  year={2023}
+}
+```
+
+**BioBERT**:
+```bibtex
+@article{biobert2020,
+  title={BioBERT: a pre-trained biomedical language representation model for biomedical text mining},
+  author={Lee, Jinhyuk and others},
+  journal={Bioinformatics},
+  year={2020}
+}
+```
+
+**PyTorch Geometric**:
+```bibtex
+@inproceedings{pyg2019,
+  title={Fast Graph Representation Learning with PyTorch Geometric},
+  author={Fey, Matthias and Lenssen, Jan Eric},
+  booktitle={ICLR Workshop on Representation Learning on Graphs and Manifolds},
+  year={2019}
+}
+```
+
+---
+
+## Data Usage Policies
+
+When using the integrated datasets:
+
+1. **Respect licenses**: Follow individual dataset licenses
+2. **Academic use**: Most datasets are free for academic research
+3. **Commercial use**: Check specific licenses; some require permission
+4. **Attribution**: Always cite original data sources
+5. **Registration**: Some databases (e.g., DisGeNET) may require registration
+
+---
+
+## Disclaimer
+
+This software is provided for research purposes only. It is not intended for clinical use or medical decision-making. The authors and contributors are not responsible for any consequences arising from the use of this software.
+
+The integrated biomedical data is provided "as-is" from public sources. While efforts have been made to ensure data quality, users should verify critical information with original sources.

@@ -1,0 +1,98 @@
+@startuml PromptGFM-Bio Architecture
+
+skinparam backgroundColor #0d0d1a
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 11
+skinparam defaultFontColor #e0e0e0
+skinparam ArrowColor #aaaaaa
+skinparam ArrowFontColor #cccccc
+skinparam ArrowFontSize 10
+skinparam ArrowThickness 1.5
+skinparam Padding 8
+skinparam RoundCorner 10
+skinparam ShadowColor #000000
+skinparam ShadowThickness 3
+
+skinparam rectangle {
+    BackgroundColor #1a1a2e
+    BorderColor #4a90d9
+    FontColor #e0e0e0
+    BorderThickness 1.5
+}
+
+skinparam package {
+    BackgroundColor #0d0d1a
+    BorderThickness 2
+    FontStyle bold
+    FontSize 12
+}
+
+left to right direction
+
+' ════════════════════════════════════════════════
+'  BIOLOGICAL GRAPH SOURCES
+' ════════════════════════════════════════════════
+package "🧬  Biological Graph\n19,576 genes · 1.85M PPI edges" as GRAPH #line:4a90d9;line.bold;text:93c5fd {
+    rectangle "STRING PPI"  as S1 #1a1a2e;line:4a90d9
+    rectangle "BioGRID PPI" as S2 #1a1a2e;line:4a90d9
+    rectangle "DisGeNET"    as S3 #1a1a2e;line:4a90d9
+    rectangle "HPO"         as S4 #1a1a2e;line:4a90d9
+    rectangle "Orphanet"    as S5 #1a1a2e;line:4a90d9
+}
+
+' ════════════════════════════════════════════════
+'  TEXT ENCODER
+' ════════════════════════════════════════════════
+package "📄  Text Encoder  (frozen)" as TEXT_ENC #line:7b68ee;line.bold;text:c4b5fd {
+    rectangle "Disease Text Description\n16,841 diseases" as DQ   #16213e;line:7b68ee
+    rectangle "PubMedBERT\n❄ Frozen  |  CLS Token"       as BERT #16213e;line:7b68ee
+    rectangle "Text Embedding\n768-d"                     as EMB  #16213e;line:7b68ee
+
+    DQ -down-> BERT : tokenize
+    BERT -down-> EMB : CLS pool
+}
+
+' ════════════════════════════════════════════════
+'  FiLM CONDITIONING
+' ════════════════════════════════════════════════
+package "⚙  FiLM Conditioning" as COND #line:e94560;line.bold;text:fca5a5 {
+    rectangle "Conditioning MLP\n768 → 512 → 256" as CMLP  #0f3460;line:e94560
+    rectangle "γ  Scale\n(per-layer)"              as GAMMA #0f3460;line:e94560
+    rectangle "β  Shift\n(per-layer)"              as BETA  #0f3460;line:e94560
+
+    CMLP -down-> GAMMA
+    CMLP -down-> BETA
+}
+
+' ════════════════════════════════════════════════
+'  GNN BACKBONE
+' ════════════════════════════════════════════════
+package "🔗  GNN Backbone  (GraphSAGE · 3 layers)" as GNN #line:00b4d8;line.bold;text:7dd3fc {
+    rectangle "GraphSAGE Layer 1\nBN · ReLU · Dropout" as L1 #1a1a2e;line:00b4d8
+    rectangle "GraphSAGE Layer 2\nBN · ReLU · Dropout" as L2 #1a1a2e;line:00b4d8
+    rectangle "GraphSAGE Layer 3\nBN · ReLU · Dropout" as L3 #1a1a2e;line:00b4d8
+
+    L1 -down-> L2
+    L2 -down-> L3
+}
+
+' ════════════════════════════════════════════════
+'  PREDICTION HEAD
+' ════════════════════════════════════════════════
+package "🎯  Prediction Head" as PRED #line:06d6a0;line.bold;text:6ee7b7 {
+    rectangle "MLP\n256 → 128 → 1"                    as PMLP  #16213e;line:06d6a0
+    rectangle "Gene Ranking Score\nfull-vocabulary\n19,576 genes" as SCORE #16213e;line:06d6a0
+
+    PMLP -down-> SCORE
+}
+
+' ════════════════════════════════════════════════
+'  MAIN DATA FLOW
+' ════════════════════════════════════════════════
+GRAPH   -right-> L1    : node features\n+ edge index
+EMB     -right-> CMLP  : z ∈ ℝ⁷⁶⁸
+GAMMA   -right-> L1    : γ, β injected\nat each layer
+BETA    -right-> L1    : ""
+L3      -right-> PMLP  : h_gene ∈ ℝ²⁵⁶
+
+@enduml

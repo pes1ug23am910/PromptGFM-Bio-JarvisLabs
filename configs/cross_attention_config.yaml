@@ -1,0 +1,166 @@
+# Cross-Attention Configuration - PromptGFM with Cross-Attention Conditioning
+# Alternative conditioning mechanism for comparison with FiLM
+
+# Model Configuration
+model:
+  name: 'promptgfm_cross_attention'
+  
+  # Use prompt conditioning
+  use_prompt: true
+  
+  # Prompt Encoder (BioBERT)
+  prompt_encoder:
+    model_name: 'microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext'
+    pooling_strategy: 'cls'
+    max_length: 512
+    freeze_encoder: false
+  
+  # GNN Architecture
+  gnn_type: 'gat'  # GAT works well with cross-attention
+  hidden_dim: 256
+  num_layers: 3
+  dropout: 0.3
+  num_heads: 4  # For GAT
+  
+  # Conditioning Mechanism
+  conditioning_type: 'cross_attention'
+  prompt_dim: 768
+  attention_heads: 8
+  attention_dropout: 0.1
+  
+  # Node Features
+  gene_feature_dim: 128
+  disease_feature_dim: 128
+  phenotype_feature_dim: 128
+  
+  # Prediction Head
+  prediction_hidden_dim: 128
+
+# Training Configuration
+training:
+  # Optimizer
+  optimizer: 'adamw'
+  learning_rate: 0.0005
+  weight_decay: 0.01
+  betas: [0.9, 0.999]
+  
+  # Training Loop
+  num_epochs: 100
+  batch_size: 24  # Smaller due to attention memory usage
+  gradient_clip: 1.0
+  accumulation_steps: 3  # Effective batch size = 72
+  
+  # Loss Function
+  loss_type: 'combined'
+  loss_weights:
+    bce: 1.0
+    ranking: 0.5
+    contrastive: 0.3
+  margin: 0.5
+  
+  # Early Stopping
+  early_stopping_patience: 15
+  min_delta: 0.0001
+  
+  # Learning Rate Scheduling
+  lr_scheduler: 'cosine'
+  lr_warmup_epochs: 5
+  lr_min: 1e-6
+  
+  # Checkpointing
+  save_best: true
+  save_last: true
+  save_interval: 5
+  checkpoint_dir: 'checkpoints/promptgfm_cross_attn'
+  pretrained_checkpoint: null
+
+# Data Configuration
+data:
+  # Paths
+  graph_file: 'data/processed/biomedical_graph.pt'
+  edge_file: 'data/processed/hpo_gene_disease_edges.csv'
+  min_score: 0.3
+  
+  # Splits
+  train_ratio: 0.8
+  val_ratio: 0.1
+  test_ratio: 0.1
+  random_seed: 42
+  
+  # Negative Sampling
+  num_negatives: 5
+  negative_sampling_strategy: 'random'
+  
+  # Prompt Configuration
+  use_disease_descriptions: true
+  use_phenotype_lists: true
+  max_phenotypes_per_disease: 20
+  
+  # DataLoader
+  num_workers: 4
+  pin_memory: true
+  prefetch_factor: 2
+
+# Evaluation Configuration
+evaluation:
+  metrics:
+    - 'auroc'
+    - 'aupr'
+    - 'precision_at_k'
+    - 'recall_at_k'
+    - 'map'
+    - 'mrr'
+    - 'ndcg_at_k'
+    - 'hit_rate_at_k'
+  
+  k_values: [10, 20, 50, 100]
+  stratify_by_rarity: true
+  rarity_thresholds:
+    ultra_rare: 2
+    very_rare: 5
+    rare: 15
+    common: 1000
+  
+  few_shot_k: [1, 3, 5, 10]
+  evaluate_on:
+    - 'val'
+    - 'test'
+
+# Case Studies Configuration
+case_studies:
+  enabled: true
+  studies:
+    - name: 'angelman'
+      known_genes: ['UBE3A']
+    - name: 'rett'
+      known_genes: ['MECP2']
+    - name: 'fragile_x'
+      known_genes: ['FMR1']
+
+# Logging Configuration
+logging:
+  use_wandb: true
+  wandb_project: 'promptgfm-bio'
+  wandb_run_name: 'promptgfm_cross_attn_finetune'
+  wandb_entity: null
+  wandb_notes: 'PromptGFM with Cross-Attention conditioning - supervised fine-tuning'
+  wandb_tags:
+    - 'promptgfm'
+    - 'cross_attention'
+    - 'finetune'
+    - 'rare-disease'
+  
+  log_interval: 10
+  log_gradients: true
+  log_model_architecture: true
+
+# Hardware Configuration
+hardware:
+  device: 'cuda'
+  mixed_precision: true
+  gpu_memory_fraction: 0.9
+
+# Reproducibility
+seed: 42
+deterministic: true
+benchmark: false

@@ -1,0 +1,47 @@
+# ============================================================================
+# PromptGFM-Bio .gitignore  (merge these lines into your existing .gitignore)
+# Goal: push CODE to a private repo; keep SECRETS and LARGE BINARIES out.
+# ============================================================================
+
+# --- Secrets (NEVER commit) -------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# --- Large data binaries (transfer separately, not via git) -----------------
+data/processed/*.pt
+data/processed/*.csv
+data/raw/
+*.zip
+*.gz
+*.tsv
+
+# --- Model artifacts --------------------------------------------------------
+checkpoints/
+checkpoints_backup_*/
+*.pt
+*.pth
+results/**/*.json
+!results/.gitkeep
+
+# --- Logs -------------------------------------------------------------------
+logs/
+*.log
+
+# --- Heavy docs/media (optional; keep repo cloneable fast) ------------------
+docs/*.mp4
+docs/*.pptx
+docs/**/images/*.png
+
+# --- Python cruft -----------------------------------------------------------
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+.pytest_cache/
+
+# --- Keep small, useful text artifacts tracked ------------------------------
+!data/splits/zero_shot_rare_diseases.json
+!requirements.txt
+!requirements-dev.txt

@@ -1,0 +1,71 @@
+flowchart LR
+    %% ── Graph Data Sources ──────────────────────────────────────────
+    subgraph GRAPH_DATA["🧬  Biological Graph  ·  19,576 genes  ·  1.85M PPI edges"]
+        direction TB
+        S1["STRING PPI"]
+        S2["BioGRID PPI"]
+        S3["DisGeNET"]
+        S4["HPO"]
+        S5["Orphanet"]
+    end
+
+    %% ── Text Encoder ────────────────────────────────────────────────
+    subgraph TEXT_ENC["📄  Text Encoder  (frozen)"]
+        direction TB
+        DQ["Disease Text\nDescription\n16,841 diseases"]
+        BERT["PubMedBERT\n❄️ Frozen\nCLS Token"]
+        EMB["Text Embedding\n768-d"]
+        DQ --> BERT --> EMB
+    end
+
+    %% ── FiLM Conditioning ───────────────────────────────────────────
+    subgraph COND["⚙️  FiLM Conditioning"]
+        direction TB
+        CMLP["Conditioning MLP\n768 → 512 → 256"]
+        GAMMA["γ  Scale\nper-layer"]
+        BETA["β  Shift\nper-layer"]
+        CMLP --> GAMMA
+        CMLP --> BETA
+    end
+
+    %% ── GNN Backbone ────────────────────────────────────────────────
+    subgraph GNN["🔗  GNN Backbone  (GraphSAGE · 3 layers)"]
+        direction TB
+        GIN1["GraphSAGE Layer 1\nBN · ReLU · Dropout"]
+        GIN2["GraphSAGE Layer 2\nBN · ReLU · Dropout"]
+        GIN3["GraphSAGE Layer 3\nBN · ReLU · Dropout"]
+        GIN1 --> GIN2 --> GIN3
+    end
+
+    %% ── Prediction Head ─────────────────────────────────────────────
+    subgraph PRED["🎯  Prediction Head"]
+        direction TB
+        PMLP["MLP\n256 → 128 → 1"]
+        SCORE["Gene Ranking Score\nfull-vocabulary\n19,576 genes"]
+        PMLP --> SCORE
+    end
+
+    %% ── Main Flow ───────────────────────────────────────────────────
+    GRAPH_DATA -- "node features\n+ edge index" --> GNN
+    TEXT_ENC   -- "z ∈ ℝ⁷⁶⁸"   --> COND
+    COND       -- "γ, β injected\nat each layer" --> GNN
+    GNN        -- "h_gene ∈ ℝ²⁵⁶" --> PRED
+
+    %% ── Styling ─────────────────────────────────────────────────────
+    classDef source   fill:#1a1a2e,stroke:#4a90d9,color:#e0e0e0,rx:6
+    classDef encoder  fill:#16213e,stroke:#7b68ee,color:#e0e0e0,rx:6
+    classDef cond     fill:#0f3460,stroke:#e94560,color:#e0e0e0,rx:6
+    classDef gnn      fill:#1a1a2e,stroke:#00b4d8,color:#e0e0e0,rx:6
+    classDef pred     fill:#16213e,stroke:#06d6a0,color:#e0e0e0,rx:6
+
+    class S1,S2,S3,S4,S5 source
+    class DQ,BERT,EMB encoder
+    class CMLP,GAMMA,BETA cond
+    class GIN1,GIN2,GIN3 gnn
+    class PMLP,SCORE pred
+
+    style GRAPH_DATA fill:#0d0d1a,stroke:#4a90d9,color:#93c5fd
+    style TEXT_ENC   fill:#0d0d1a,stroke:#7b68ee,color:#c4b5fd
+    style COND       fill:#0d0d1a,stroke:#e94560,color:#fca5a5
+    style GNN        fill:#0d0d1a,stroke:#00b4d8,color:#7dd3fc
+    style PRED       fill:#0d0d1a,stroke:#06d6a0,color:#6ee7b7

@@ -1,0 +1,102 @@
+# Baseline Configuration - GNN-Only Model (No Prompt)
+# For ablation studies comparing GNN-only vs PromptGFM
+
+# Model Configuration
+model:
+  name: 'gnn_only_baseline'
+  
+  # GNN Architecture
+  gnn_type: 'graphsage'  # Options: 'graphsage', 'gat', 'gin'
+  hidden_dim: 256
+  num_layers: 3
+  dropout: 0.3
+  
+  # No prompt encoder for baseline
+  use_prompt: false
+  
+  # Node Features
+  gene_feature_dim: 128
+  disease_feature_dim: 128
+  phenotype_feature_dim: 128
+
+# Training Configuration
+training:
+  # Optimizer
+  optimizer: 'adam'
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  
+  # Training Loop
+  num_epochs: 100
+  batch_size: 64
+  gradient_clip: 1.0
+  
+  # Loss Function
+  loss_type: 'bce'  # Binary Cross-Entropy for baseline
+  
+  # Early Stopping
+  early_stopping_patience: 10
+  min_delta: 0.0001
+  
+  # Learning Rate Scheduling
+  lr_scheduler: 'cosine'  # Options: 'cosine', 'plateau', 'step'
+  lr_warmup_epochs: 5
+  
+  # Checkpointing
+  save_best: true
+  save_last: true
+  checkpoint_dir: 'checkpoints/baseline'
+
+# Data Configuration
+data:
+  # Paths
+  graph_file: 'data/processed/biomedical_graph.pt'
+  edge_file: 'data/processed/hpo_gene_disease_edges.csv'
+  min_score: 0.3
+  
+  # Splits
+  train_ratio: 0.8
+  val_ratio: 0.1
+  test_ratio: 0.1
+  random_seed: 42
+  
+  # Negative Sampling
+  num_negatives: 5  # Negative samples per positive sample
+  negative_sampling_strategy: 'random'  # Options: 'random', 'hard'
+  
+  # DataLoader
+  num_workers: 4
+  pin_memory: true
+
+# Evaluation Configuration
+evaluation:
+  # Metrics to compute
+  metrics:
+    - 'auroc'
+    - 'aupr'
+    - 'precision_at_k'
+    - 'recall_at_k'
+    - 'map'
+    - 'mrr'
+    - 'ndcg_at_k'
+    - 'hit_rate_at_k'
+  
+  # K values for ranking metrics
+  k_values: [10, 20, 50, 100]
+  
+  # Stratified evaluation
+  stratify_by_rarity: true
+
+# Logging Configuration
+logging:
+  use_wandb: true
+  wandb_project: 'promptgfm-bio'
+  wandb_run_name: 'baseline_gnn_only'
+  wandb_entity: null  # Set your W&B username/team
+  
+  log_interval: 10  # Log every N batches
+  
+# Hardware Configuration
+hardware:
+  device: 'cuda'  # Options: 'cuda', 'cpu'
+  mixed_precision: true  # Use automatic mixed precision (AMP)

@@ -1,0 +1,66 @@
+# PromptGFM-Bio — Cursor Persistent Context
+# Updated: v6 complete. Training done. Now in ablation + paper phase.
+
+## Hardware
+- CPU: Intel i9-14900K · RAM: 128 GB
+- GPU: RTX 4090 (24 GB VRAM) · CUDA 12.4 · PyTorch 2.6.0+cu124
+- OS: Linux · env: micromamba `promptgfm` (Python 3.12)
+- Project root: /home/mluser/projects_yash/new_project/PromptGFM-Bio
+
+## Key source files
+- src/models/promptgfm.py         ← main model (GNN + FiLM conditioning)
+- src/models/gnn_backbone.py      ← GraphSAGE encoder, 3 layers 128→512→512
+- src/models/conditioning.py      ← FiLM: γ,β = MLP(PubMedBERT); h' = γ⊙h + β
+- src/models/prompt_encoder.py    ← frozen PubMedBERT CLS pooling → 768-dim
+- src/training/finetune.py        ← training loop (AMP, BCE loss, 5 neg samples)
+- src/training/losses.py          ← loss functions
+- src/data/dataset.py             ← heterogeneous graph dataset
+- src/data/preprocess.py          ← graph builder (STRING + BioGRID + DisGeNET + HPO)
+- scripts/train.py                ← training entry point (fork-context patched)
+- scripts/evaluate.py             ← full-vocabulary ranking evaluator
+- configs/workstation_config.yaml ← active config (auto-patched by notebook)
+
+## Graph state (current)
+- data/processed/biomedical_graph.pt is BUILT and valid
+- Nodes: gene=19576, disease=16841, phenotype=11794
+- Edges: gene↔gene=1,854,012 (STRING PPI ≥700), gene↔disease=9,741,610
+- Message passing IS active (gene-gene edges present)
+
+## Checkpoint state
+- Best checkpoint: checkpoints/promptgfm_film/best_model.pt (epoch 87)
+- Best val AUROC: 0.9547 · Val AUPR: 0.7509
+- Test AUROC: 0.9626 · Test AUPR: 0.0188 (low AUPR is expected — full 19,576 gene ranking)
+- Training complete: 100/100 epochs, converged at epoch 87
+
+## Known issues (fix these before experiments)
+- finetune.py line 148: torch.cuda.amp.autocast → torch.amp.autocast('cuda', ...)
+- PyG extensions (pyg-lib, torch-scatter, torch-sparse) have ABI mismatch
+  → using pure-PyTorch fallbacks (correct but ~10-20% slower scatter ops)
+  → non-blocking, do not spend time fixing unless performance is the bottleneck
+
+## What we are building toward (publication)
+- Target: NeurIPS/ICML 2026 Bio-ML Workshop
+- Paper story: PPI message passing (0 → 1.85M edges) boosted AUROC 0.813 → 0.9626
+- Still needed: 4-variant ablation table, zero-shot rare disease eval, paper sections
+
+## Ablation variants to run (in order)
+1. No-MP, No-Prompt: pure MLP baseline (disable GNN + FiLM)
+2. No-MP + Prompt: GNN but no PPI edges + FiLM ON (use graph without gene-gene edges)
+3. MP, No-Prompt: PPI edges ON, FiLM conditioning OFF (γ=1, β=0)
+4. Full model: PPI edges ON + FiLM ON ← current best (AUROC 0.9626)
+Run each with seed=42, 43, 44. Report mean ± std.
+
+## Coding rules (always follow)
+- Never rewrite entire files — output only changed functions with line numbers
+- Never touch PROJECT_ROOT, path setup, or checkpoint save/load logic
+- Keep num_workers configurable — never hardcode 0 as permanent fix
+- Preserve fork-context patch in train.py (multiprocessing_context="fork")
+- All fixes must include a comment explaining WHY, not just WHAT
+- When editing notebook cells, reference the cell ID and output only that cell
+- Do not add unrequested features; fix exactly what is asked
+
+## Output discipline (saves tokens)
+- No preamble. No "here is the code". Start with the code directly.
+- No re-explaining logic that is already in comments
+- When the fix is a single line, output just that line + its context (±3 lines)
+- For multi-file changes, list affected files first, then show each patch

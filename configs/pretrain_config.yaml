@@ -1,0 +1,102 @@
+# Pretraining Configuration - Self-Supervised Learning (Optional)
+# For pre-training GNN on graph structure before supervised fine-tuning
+
+# Model Configuration
+model:
+  name: 'promptgfm_pretrain'
+  
+  # GNN Architecture
+  gnn_type: 'graphsage'  # Options: 'graphsage', 'gat', 'gin'
+  hidden_dim: 256
+  num_layers: 3
+  dropout: 0.3
+  
+  # Node Features
+  gene_feature_dim: 128
+  disease_feature_dim: 128
+  phenotype_feature_dim: 128
+
+# Pretraining Configuration
+pretraining:
+  # Pretraining Tasks
+  tasks:
+    masked_node_prediction:
+      enabled: true
+      weight: 1.0
+      mask_ratio: 0.15
+      mask_type: 'random'  # Options: 'random', 'degree_based'
+    
+    edge_contrastive:
+      enabled: true
+      weight: 0.5
+      num_negatives: 5
+      temperature: 0.07
+    
+    graph_contrastive:
+      enabled: true
+      weight: 0.3
+      augmentation:
+        - 'node_drop'
+        - 'edge_drop'
+        - 'feature_mask'
+      drop_ratio: 0.2
+      temperature: 0.07
+  
+  # Pretraining Loop
+  num_epochs: 50
+  batch_size: 64
+  gradient_clip: 1.0
+
+# Training Configuration
+training:
+  # Optimizer
+  optimizer: 'adamw'
+  learning_rate: 0.001  # Higher LR for pretraining
+  weight_decay: 0.01
+  betas: [0.9, 0.999]
+  
+  # Learning Rate Scheduling
+  lr_scheduler: 'cosine'
+  lr_warmup_epochs: 3
+  lr_min: 1e-6
+  
+  # Checkpointing
+  save_best: true
+  save_last: true
+  save_interval: 5
+  checkpoint_dir: 'checkpoints/pretrain'
+
+# Data Configuration
+data:
+  # Paths
+  graph_file: 'data/processed/biomedical_graph.pt'
+  
+  # DataLoader
+  num_workers: 4
+  pin_memory: true
+  prefetch_factor: 2
+
+# Logging Configuration
+logging:
+  use_wandb: true
+  wandb_project: 'promptgfm-bio'
+  wandb_run_name: 'pretrain_self_supervised'
+  wandb_entity: null
+  wandb_notes: 'Self-supervised pretraining on biomedical graph'
+  wandb_tags:
+    - 'pretrain'
+    - 'self-supervised'
+    - 'graph-contrastive'
+  
+  log_interval: 20
+
+# Hardware Configuration
+hardware:
+  device: 'cuda'
+  mixed_precision: true
+
+# Reproducibility
+seed: 42
+deterministic: true
+benchmark: false
+
