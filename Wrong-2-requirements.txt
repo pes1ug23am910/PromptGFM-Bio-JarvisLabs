@@ -1,0 +1,89 @@
+# PromptGFM-Bio — requirements.txt  (Path 2 / JarvisLabs A100, CUDA 12.1)
+# =============================================================================
+# Three changes vs the original, each explained inline. Core pins are UNCHANGED
+# so the numerics are identical to the workstation runs' library stack.
+#
+# INSTALL ORDER ON THE INSTANCE (do NOT just `pip install -r requirements.txt`
+# and hope — the PyG companion wheels must come from the CUDA-matched index):
+#
+#   1) pip install -r requirements.txt          # installs everything below
+#   2) CUDA=$(python -c "import torch;print('cu'+torch.version.cuda.replace('.',''))")
+#      pip install torch-scatter torch-sparse torch-cluster \
+#          -f https://data.pyg.org/whl/torch-2.1.0+${CUDA}.html
+#      # e.g. CUDA 12.1 -> .../torch-2.1.0+cu121.html
+#   3) export WANDB_MODE=offline                 # see note at bottom
+#   4) python scripts/verify_setup.py            # confirms versions + CUDA
+#
+# =============================================================================
+
+# Core Deep Learning  (UNCHANGED — defines the numerics; do not bump)
+torch==2.1.0
+torchvision==0.16.0
+torchaudio==2.1.0
+
+# PyTorch Geometric
+torch-geometric==2.4.0
+# --- CHANGE 1 -------------------------------------------------------------
+# torch-scatter / torch-sparse / torch-cluster are intentionally NOT listed
+# here. Unpinned, `pip install -r` tries to COMPILE them from source against
+# torch 2.1 (slow; frequently fails on a fresh box). Install them in step (2)
+# above from the prebuilt CUDA-matched wheel index instead.
+#   torch-scatter   <- via data.pyg.org wheel index
+#   torch-sparse    <- via data.pyg.org wheel index
+#   torch-cluster   <- via data.pyg.org wheel index
+# --------------------------------------------------------------------------
+
+# Transformers and NLP
+# --- CHANGE 2 -------------------------------------------------------------
+# Pin huggingface_hub so transformers 4.35 resolves deterministically. The
+# correct ceiling is <0.18: transformers 4.35 pulls tokenizers 0.14.x, which
+# requires huggingface_hub<0.18. 0.17.3 is the newest version in range, is
+# contemporaneous with transformers 4.35, and still ships cached_download (the
+# symbol whose later removal in hub>=0.26 breaks old sentence-transformers).
+huggingface_hub==0.17.3
+# --------------------------------------------------------------------------
+transformers==4.35.0
+# --- CHANGE 3 -------------------------------------------------------------
+# sentence-transformers is NOT imported anywhere in src/ or scripts/ (verified
+# by grep). Left installed it is a latent landmine: old versions import
+# `cached_download` from huggingface_hub. Commented out. If you ever add a
+# baseline that needs it, uncomment — the hub pin above keeps it working.
+# sentence-transformers==2.2.2
+# --------------------------------------------------------------------------
+datasets==2.14.0
+
+# Biomedical Data Tools
+biopython==1.81
+pandas==2.1.0
+numpy==1.24.0
+networkx==3.1
+scipy==1.11.0
+
+# Machine Learning Utilities
+scikit-learn==1.3.0
+matplotlib==3.8.0
+seaborn==0.12.0
+
+# Progress and Logging
+tqdm==4.66.0
+wandb==0.15.0
+pyyaml==6.0
+
+# Development and Testing
+pytest==7.4.0
+jupyter==1.0.0
+ipykernel==6.25.0
+
+# Web Requests
+requests==2.31.0
+
+# Additional utilities
+python-dotenv==1.0.0
+
+# =============================================================================
+# WANDB NOTE: the trainer calls wandb.init()/wandb.log() when a config sets
+# `use_wandb: true`. The four ablation configs do not set it (so it is likely
+# off), but to GUARANTEE a 53-hour batch never stalls waiting for a wandb login,
+# export WANDB_MODE=offline (step 3 above) before launching. This makes wandb a
+# local no-op; no account or network needed. Alternatively set use_wandb: false.
+# =============================================================================
